@@ -36,6 +36,16 @@ app.get("/", (req, res) => {
 });
 
 // tests
+// test 4, 5, 6
+app.get("/api/users", async (req, res) => {
+  const users = await User.find({}).select("_id username"); // test 6
+  if (!users) {
+    res.send("No users");
+  } else {
+    res.json(users);
+  }
+})
+
 // test 2
 app.post("/api/users", async (req, res) => {
   console.log(req.body);
