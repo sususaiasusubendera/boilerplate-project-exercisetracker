@@ -10,17 +10,17 @@ mongoose.connect(process.env.DB_URL);
 // schemas
 // userSchema
 const userSchema = new mongoose.Schema({
-  username: String
+  username: String,
 });
 
 const User = mongoose.model("User", userSchema);
 
 // exerciseSchema
 const exerciseSchema = new mongoose.Schema({
-  user_id: { type: String, required: true},
+  _id: { type: String, required: true },
   description: String,
   duration: Number,
-  date: Date
+  date: Date,
 });
 
 const Exercise = mongoose.model("Exercise", exerciseSchema);
@@ -37,9 +37,53 @@ app.get("/", (req, res) => {
 
 // tests
 // test 2
-app.post("/api/users", (req, res) => {
+app.post("/api/users", async (req, res) => {
   console.log(req.body);
-  res.json({ greeting: "hello" });
+  const userObj = new User({
+    username: req.body.username,
+  });
+
+  try {
+    const user = await userObj.save();
+    console.log(user);
+    res.json(user); // test 3
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+// test 7
+app.post("/api/users/:_id/exercises", async (req, res) => {
+  const id = req.params._id;
+  const { description, duration, date } = req.body;
+
+  try {
+    const user = await User.findById(id);
+    console.log(user.id);
+    if (!user) {
+      res.send("No user");
+    } else {
+      const exerciseObj = new Exercise({
+        _id: user._id,
+        description,
+        duration,
+        date: date ? new Date(date) : new Date(), // test 7: empty date --> now date
+      });
+      const exercise = await exerciseObj.save();
+      console.log(exercise);
+      // test 8 (?)
+      res.json({
+        _id: user._id,
+        username: user.username,
+        description: exercise.description,
+        duration: exercise.duration,
+        date: new Date(exercise.date).toDateString(), // test 7
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    res.send("Error saving");
+  }
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
