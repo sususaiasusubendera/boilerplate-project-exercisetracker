@@ -96,6 +96,12 @@ app.post("/api/users/:_id/exercises", async (req, res) => {
   }
 });
 
+app.get("/api/users/:_id/logs", async (req, res) => {
+  const { from, to, limit} = req.query;
+  const id = req.params._id;
+  const user = await User.findById(id);
+});
+
 const listener = app.listen(process.env.PORT || 3000, () => {
   console.log("Your app is listening on port " + listener.address().port);
 });
